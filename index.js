@@ -1,11 +1,11 @@
 const express = require('express');
+const cors = require('cors'); // Obligatoire pour Stremio
 const app = express();
 
-// 1. CONFIGURATION DU PORT POUR RENDER (TRÈS IMPORTANT)
-const port = process.env.PORT || 10000;
-const host = '0.0.0.0'; 
+// 1. Autoriser les connexions externes (CORS)
+app.use(cors());
 
-// 2. LE MANIFEST (Pour que Stremio et ton HTML voient l'addon)
+// 2. Le Manifest (Carte d'identité pour Stremio)
 app.get('/manifest.json', (req, res) => {
     res.json({
         id: 'org.mabulle.vip',
@@ -18,27 +18,34 @@ app.get('/manifest.json', (req, res) => {
     });
 });
 
-// 3. LA ROUTE DE LECTURE (Celle qui reçoit le hash)
+// 3. La Route de Stream (Utilisée par Stremio et ton site)
+app.get('/stream/:type/:id.json', (req, res) => {
+    // Cette route est spécifique à l'installation Stremio
+    res.json({ streams: [] }); 
+});
+
+// 4. Ta route personnalisée pour ton site HTML
 app.get('/stream/:hash', (req, res) => {
     const hash = req.params.hash;
     const key = req.query.key;
 
-    // Vérification de ta clé secrète
     if (key !== 'MA-CLE-SECRET-2026') {
         return res.status(403).send('Clé VIP invalide');
     }
 
-    // Ici, le serveur répond qu'il est prêt à lire le hash
-    // (C'est ici que ton moteur de streaming intervient)
-    res.send(`Flux vidéo prêt pour le hash : ${hash}`);
+    // Ici le serveur simule le flux vidéo pour le hash
+    res.send(`Lecture du flux pour le hash : ${hash}`);
 });
 
-// 4. PAGE D'ACCUEIL (Pour tester si le site est en ligne)
+// 5. Page d'accueil pour tester dans le navigateur
 app.get('/', (req, res) => {
     res.send('<h1>🚀 MA BULLE VIP EST EN LIGNE</h1>');
 });
 
-// 5. LANCEMENT DU SERVEUR
+// 6. Lancement du serveur (Config Render)
+const port = process.env.PORT || 10000;
+const host = '0.0.0.0';
+
 app.listen(port, host, () => {
-    console.log(`Serveur actif sur http://${host}:${port}`);
+    console.log(`Serveur actif sur le port ${port}`);
 });
