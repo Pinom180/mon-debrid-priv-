@@ -1,7 +1,7 @@
 {
   "name": "ma-bulle-vip",
-  "version": "1.2.0",
-  "description": "Serveur de streaming privé 4K & 1080p",
+  "version": "3.0.0",
+  "description": "Serveur VIP - Moteur Torrentio Intégré",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
