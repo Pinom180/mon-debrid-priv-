@@ -1,27 +1,44 @@
 const express = require('express');
-const WebTorrent = require('webtorrent');
 const app = express();
-const client = new WebTorrent();
 
-const PORT = process.env.PORT || 10000;
-const MA_CLE = "MA-CLE-SECRET-2026"; 
+// 1. CONFIGURATION DU PORT POUR RENDER (TRÈS IMPORTANT)
+const port = process.env.PORT || 10000;
+const host = '0.0.0.0'; 
 
-app.get('/', (req, res) => res.send("La bulle est active !"));
-
-app.get('/stream/:hash', (req, res) => {
-    if (req.query.key !== MA_CLE) return res.status(403).send("Clé interdite");
-    
-    const magnet = `magnet:?xt=urn:btih:${req.params.hash}`;
-    
-    client.torrents.forEach(t => t.destroy());
-
-    client.add(magnet, (torrent) => {
-        const file = torrent.files.find(f => f.name.match(/\.(mp4|mkv|avi)$/i));
-        if (!file) return res.status(404).send("Pas de vidéo");
-
-        res.setHeader('Content-Type', 'video/mp4');
-        file.createReadStream().pipe(res);
+// 2. LE MANIFEST (Pour que Stremio et ton HTML voient l'addon)
+app.get('/manifest.json', (req, res) => {
+    res.json({
+        id: 'org.mabulle.vip',
+        version: '1.0.0',
+        name: 'MA BULLE VIP',
+        description: 'Serveur Privé 2026',
+        resources: ['stream'],
+        types: ['movie', 'series'],
+        idPrefixes: ['tt', 'tmdb']
     });
 });
 
-app.listen(PORT, () => console.log("Serveur prêt !"));
+// 3. LA ROUTE DE LECTURE (Celle qui reçoit le hash)
+app.get('/stream/:hash', (req, res) => {
+    const hash = req.params.hash;
+    const key = req.query.key;
+
+    // Vérification de ta clé secrète
+    if (key !== 'MA-CLE-SECRET-2026') {
+        return res.status(403).send('Clé VIP invalide');
+    }
+
+    // Ici, le serveur répond qu'il est prêt à lire le hash
+    // (C'est ici que ton moteur de streaming intervient)
+    res.send(`Flux vidéo prêt pour le hash : ${hash}`);
+});
+
+// 4. PAGE D'ACCUEIL (Pour tester si le site est en ligne)
+app.get('/', (req, res) => {
+    res.send('<h1>🚀 MA BULLE VIP EST EN LIGNE</h1>');
+});
+
+// 5. LANCEMENT DU SERVEUR
+app.listen(port, host, () => {
+    console.log(`Serveur actif sur http://${host}:${port}`);
+});
