@@ -1,6 +1,6 @@
 {
   "name": "ma-bulle-vip",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Serveur de streaming privé 4K & 1080p",
   "main": "index.js",
   "scripts": {
