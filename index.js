@@ -3,29 +3,25 @@ const WebTorrent = require('webtorrent');
 const app = express();
 const client = new WebTorrent();
 
-// MODIFIE TA CLÉ ICI (Garde les guillemets)
-const MY_KEY = "MA-CLE-SECRET-2026"; 
+const PORT = process.env.PORT || 10000;
+const MA_CLE = "MA-CLE-SECRET-2026"; 
 
-app.get('/', (req, res) => {
-    res.send("Bulle Active. En attente de clé...");
-});
+app.get('/', (req, res) => res.send("La bulle est active !"));
 
 app.get('/stream/:hash', (req, res) => {
-    if (req.query.key !== MY_KEY) return res.status(403).send("Clé invalide");
-
+    if (req.query.key !== MA_CLE) return res.status(403).send("Clé interdite");
+    
     const magnet = `magnet:?xt=urn:btih:${req.params.hash}`;
     
-    // On nettoie les anciens torrents pour ne pas saturer le serveur gratuit
-    if (client.torrents.length > 2) {
-        client.torrents[0].destroy();
-    }
+    client.torrents.forEach(t => t.destroy());
 
     client.add(magnet, (torrent) => {
         const file = torrent.files.find(f => f.name.match(/\.(mp4|mkv|avi)$/i));
-        if (!file) return res.status(404).send("Vidéo non trouvée");
+        if (!file) return res.status(404).send("Pas de vidéo");
 
         res.setHeader('Content-Type', 'video/mp4');
         file.createReadStream().pipe(res);
-        console.log("Streaming en cours...");
     });
 });
+
+app.listen(PORT, () => console.log("Serveur prêt !"));
